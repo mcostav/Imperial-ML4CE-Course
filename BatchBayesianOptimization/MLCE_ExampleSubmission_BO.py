@@ -3,6 +3,9 @@ import numpy as np
 from datetime import datetime
 import random
 import matplotlib.pyplot as plt
+import time
+import sobol_seq
+import scipy
 
 def objective_func(X: list): 
     return(np.array(virtual_lab.conduct_experiment(X)))
