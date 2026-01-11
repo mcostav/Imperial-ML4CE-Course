@@ -11,7 +11,7 @@ from scipy.optimize import minimize
 # Group Submission
 group_names = ["Marta Garcia Belza", "Eric Lun"]
 cid_numbers = ["", ""]
-oral_assignement = [1]
+oral_assignement = [1] # 1 for yes to assessment in oral presentation
 
 #Sobol searchspace generation
 def sobol_searchspace(
@@ -23,12 +23,12 @@ def sobol_searchspace(
     celltypes=('celltype_1', 'celltype_2', 'celltype_3'),
     n_samples=None,
     m=None,
-    balance_celltypes=True
+    balance_celltypes=False
 ):
     """
     Generate Sobol-sampled points for:
         [temp, pH, f1, f2, f3, celltype]
-    Returns a list of lists (same format as original linspace code).
+    Returns a list of lists.
     """
     # Validate ranges
     def _check_range(rng, name):
@@ -59,9 +59,9 @@ def sobol_searchspace(
 
     # Assign celltype
     if balance_celltypes:
-        cat_idx = np.arange(n_samples) % n_cat
+        cat_idx = np.arange(n_samples) % n_cat  # ensures balanced representation [0, 1, 2, 0, 1, 2, ...]
     else:
-        cat_idx = np.minimum((U[:, 5] * n_cat).astype(int), n_cat - 1)
+        cat_idx = np.minimum((U[:, 5] * n_cat).astype(int), n_cat - 1) # quasi-random assignment
     celltype_col = [celltypes[i] for i in cat_idx]
 
     # Return list of lists
@@ -70,8 +70,6 @@ def sobol_searchspace(
 #Objective function
 def objective_func(X: list): 
     return(np.array(virtual_lab.conduct_experiment(X)))
-
-def acquisition_EI(mean, var, best_y):
     """ Expected Improvement for maximization """
     s = np.sqrt(np.maximum(0.0, var))
     improvement = mean - best_y
@@ -323,12 +321,15 @@ class BO:
         self.time = [datetime.timestamp(datetime.now())-start_time]*(len(self.Y))
         
         for iteration in range(iterations):
+            # Ask acquisition function for next batch
+
+            # Objective function batch evaluation
             random_selection = RandomSelection(self.X_searchspace, objective_func, self.batch)
             print(f"[Iter {iteration+1}/{self.iterations}] Best so far: {np.max(self.Y):.4f}")
             self.Y = np.concatenate([self.Y, random_selection.random_Y])
             self.time += [datetime.timestamp(datetime.now())-start_time]*(len(random_selection.random_Y))
 
-
+'''
 X_initial = ([[33, 6.25, 10, 20, 20, 'celltype_1'],
               [38, 8, 20, 10, 20, 'celltype_3'],
               [37, 6.8, 0, 50, 0, 'celltype_1'],
@@ -336,16 +337,15 @@ X_initial = ([[33, 6.25, 10, 20, 20, 'celltype_1'],
               [36, 6.1, 20, 20, 10, 'celltype_2'],
               [38, 6.0, 30, 50, 10, 'celltype_1']])
 
-# Potential for optimisation doing sobol sampling instead of linspace
-# Maybe 
-temp = np.linspace(30, 40, 5)
-pH = np.linspace(6, 8, 5)
-f1 = np.linspace(0, 50, 5)
-f2 = np.linspace(0, 50, 5)
-f3 = np.linspace(0, 50, 5)
-celltype = ['celltype_1','celltype_2','celltype_3']
+#temp = np.linspace(30, 40, 5)
+#pH = np.linspace(6, 8, 5)
+#f1 = np.linspace(0, 50, 5)
+#f2 = np.linspace(0, 50, 5)
+#f3 = np.linspace(0, 50, 5)
+#celltype = ['celltype_1','celltype_2','celltype_3']
 
-X_searchspace     = [[a,b,c,d,e,f] for a in temp for b in pH for c in f1 for d in f2 for e in f3 for f in celltype]
-
+#X_searchspace     = [[a,b,c,d,e,f] for a in temp for b in pH for c in f1 for d in f2 for e in f3 for f in celltype]
+'''
+X_initial=()
 X_searchspace = sobol_searchspace()
 BO_m = BO(X_initial, X_searchspace, 15, 5, objective_func)
