@@ -23,14 +23,14 @@ def sobol_searchspace(
     celltypes=('celltype_1', 'celltype_2', 'celltype_3'),
     n_samples=None,
     m=None,
-    balance_celltypes=False
+    balance_celltypes=True
 ):
     """
     Generate Sobol-sampled points for:
-        [temp, pH, f1, f2, f3, celltype]
-    Returns a list of lists.
+        [temp, pH, f1, f2, f3, celltype_idx]
+    Returns a fully numeric NumPy array (float + int), and a mapping dict.
     """
-    # Validate ranges
+    # Validate ranges to see if they are a list or tuple of (min, max) and min <= max
     def _check_range(rng, name):
         if not (isinstance(rng, (tuple, list)) and len(rng) == 2 and rng[0] <= rng[1]):
             raise ValueError(f"{name}_range must be (min, max). Got {rng}")
@@ -57,15 +57,18 @@ def sobol_searchspace(
     f2   = _scale(U[:, 3], *f2_range)
     f3   = _scale(U[:, 4], *f3_range)
 
-    # Assign celltype
+    # Scale of discrete variable (celltype)
     if balance_celltypes:
         cat_idx = np.arange(n_samples) % n_cat  # ensures balanced representation [0, 1, 2, 0, 1, 2, ...]
     else:
-        cat_idx = np.minimum((U[:, 5] * n_cat).astype(int), n_cat - 1) # quasi-random assignment
-    celltype_col = [celltypes[i] for i in cat_idx]
+        cat_idx = np.minimum((U[:, 5] * n_cat).astype(np.int8), n_cat - 1) # quasi-random assignment (i.e. Sobol)
+    
+    #Transform to celltype labels if needed
+    #celltype_col = [celltypes[i] for i in cat_idx]
 
-    # Return list of lists
-    return [[temp[i], pH[i], f1[i], f2[i], f3[i], celltype_col[i]] for i in range(n_samples)]
+    # Stack numeric columns (float64 for first 5, int8 for last)
+    return np.column_stack([temp, pH, f1, f2, f3, cat_idx])
+
 
 #Objective function
 def objective_func(X: list): 
