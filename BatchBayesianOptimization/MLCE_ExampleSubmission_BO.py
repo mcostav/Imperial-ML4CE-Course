@@ -23,7 +23,7 @@ def sobol_searchspace(
     celltypes=('celltype_1', 'celltype_2', 'celltype_3'),
     n_samples=None,
     m=None,
-    balance_celltypes=True
+    balance_celltypes=False
 ):
     """
     Generate Sobol-sampled points for:
@@ -63,12 +63,11 @@ def sobol_searchspace(
     else:
         cat_idx = np.minimum((U[:, 5] * n_cat).astype(np.int8), n_cat - 1) # quasi-random assignment (i.e. Sobol)
     
-    #Transform to celltype labels if needed
+    #Transform to celltype labels from [0,1,2] when needed
     #celltype_col = [celltypes[i] for i in cat_idx]
 
-    # Stack numeric columns (float64 for first 5, int8 for last)
+    # Return numpy array by stacking numeric columns (float64 for first 5, int8 for last)
     return np.column_stack([temp, pH, f1, f2, f3, cat_idx])
-
 
 #Objective function
 def objective_func(X: list): 
@@ -350,5 +349,5 @@ X_initial = ([[33, 6.25, 10, 20, 20, 'celltype_1'],
 #X_searchspace     = [[a,b,c,d,e,f] for a in temp for b in pH for c in f1 for d in f2 for e in f3 for f in celltype]
 '''
 X_initial=()
-X_searchspace = sobol_searchspace()
+X_searchspace = sobol_searchspace() #Numpy array
 BO_m = BO(X_initial, X_searchspace, 15, 5, objective_func)
