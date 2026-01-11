@@ -87,6 +87,8 @@ def objective_func(X: list):
     EI[~nz] = 0.0
     return EI
 
+#TODO: Implement search space and Xtraining
+#TODO: Make sure that GP inference can be queried with multiple points at once for batch BO
 #Helper class - Gaussian Process
 class GP_model:
     
@@ -348,6 +350,7 @@ X_initial = ([[33, 6.25, 10, 20, 20, 'celltype_1'],
 
 #X_searchspace     = [[a,b,c,d,e,f] for a in temp for b in pH for c in f1 for d in f2 for e in f3 for f in celltype]
 '''
+#TODO: Select 6 initial points
 X_initial=()
 X_searchspace = sobol_searchspace() #Numpy array
 BO_m = BO(X_initial, X_searchspace, 15, 5, objective_func)
