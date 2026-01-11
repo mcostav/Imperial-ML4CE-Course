@@ -72,20 +72,6 @@ def sobol_searchspace(
 #Objective function
 def objective_func(X: list): 
     return(np.array(virtual_lab.conduct_experiment(X)))
-    """ Expected Improvement for maximization """
-    s = np.sqrt(np.maximum(0.0, var))
-    improvement = mean - best_y
-    z = np.zeros_like(mean)
-    nz = s > 0
-    z[nz] = improvement[nz] / s[nz]
-
-    # CDF and PDF of standard normal
-    Phi = 0.5 * (1.0 + scipy.special.erf(z / np.sqrt(2.0)))
-    phi = (1.0 / np.sqrt(2.0 * np.pi)) * np.exp(-0.5 * z**2)
-
-    EI = improvement * Phi + s * phi
-    EI[~nz] = 0.0
-    return EI
 
 #TODO: Implement search space and Xtraining
 #TODO: Make sure that GP inference can be queried with multiple points at once for batch BO
@@ -310,7 +296,6 @@ class RandomSelection:
 
         random_searchspace = [self.X_searchspace[random.randrange(len(self.X_searchspace))] for c in range(batch)]
         self.random_Y = objective_func(random_searchspace)
-
 
 class BO:
     def __init__(self, X_initial, X_searchspace, iterations, batch, objective_func):
