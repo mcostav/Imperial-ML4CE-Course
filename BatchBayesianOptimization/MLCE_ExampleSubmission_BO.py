@@ -66,6 +66,9 @@ def sobol_searchspace(
     #Transform to celltype labels from [0,1,2] when needed
     #celltype_col = [celltypes[i] for i in cat_idx]
 
+    # Return list of lists, if needed
+    #return [[temp[i], pH[i], f1[i], f2[i], f3[i], celltype_col[i]] for i in range(n_samples)]
+
     # Return numpy array by stacking numeric columns (float64 for first 5, int8 for last)
     return np.column_stack([temp, pH, f1, f2, f3, cat_idx])
 
